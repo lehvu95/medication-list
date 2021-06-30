@@ -114,9 +114,9 @@ export const InventoryList = (props: InventoryListProps) => {
       drugType === '' ||
       id === '' ||
       amountType === '' ||
-      dosageValue && dosageValue <= 0 ||
-      price && price  <= 0 ||
-      supplyInDays && supplyInDays <= 0 ||
+      (dosageValue && dosageValue <= 0) ||
+      (price && price  <= 0) ||
+      (supplyInDays && supplyInDays <= 0) ||
       imageUrl === '' ||
       description === '';
   }

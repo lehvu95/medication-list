@@ -23,8 +23,19 @@ interface InventoryListProps {
 }
 
 const itemReducer = (state: Items, event: any) => {
-  if (event.rest) {
-    return {}
+  if (event.reset) {
+    return {
+      amountType: '',
+      description: '',
+      dosageValue: 0,
+      drugType: '',
+      id: '',
+      imageUrl: '',
+      name: '',
+      price: 0,
+      supplyInDays: 0,
+      __typename: '',
+    };
   }
   return {
     ...state,
@@ -38,13 +49,25 @@ export const InventoryList = (props: InventoryListProps) => {
   const [inventory, updateInventory] = useState(products);
   const [lastDeleted, updateLastDeleted] = useState({});
   const [lastAdded, updateLastAdded] = useState({});
-  const [newItem, setNewItem] = useReducer(itemReducer, {});
+  const [newItem, setNewItem] = useReducer(itemReducer, {
+      amountType: '',
+      description: '',
+      dosageValue: 0,
+      drugType: '',
+      id: '',
+      imageUrl: '',
+      name: '',
+      price: 0,
+      supplyInDays: 0,
+      __typename: '',
+    }
+  );
 
   useEffect(() => {
     setNewItem({})
   }, [inventory]);
 
-  //console.log('newItem:', newItem)
+  console.log('newItem:', newItem)
   
   const showUndoDelete = JSON.stringify(lastDeleted) !== JSON.stringify({});
   const showUndoAdd = JSON.stringify(lastAdded) !== JSON.stringify({});
@@ -78,30 +101,55 @@ export const InventoryList = (props: InventoryListProps) => {
     });
   };
 
-  const handleSubmit = (item: Items) => {
-    addItem(item);
+  const handleSubmit = (event: any) => {
+    event.preventDefault();
+    addItem(newItem);
+    setNewItem({reset: true});
+  }
+
+  const getDisableButton = () => {
+    const {__typename, name, drugType, id, amountType, dosageValue, price, supplyInDays, imageUrl, description} = newItem;
+    return __typename === '' ||
+      name === '' ||
+      drugType === '' ||
+      id === '' ||
+      amountType === '' ||
+      dosageValue && dosageValue <= 0 ||
+      price && price  <= 0 ||
+      supplyInDays && supplyInDays <= 0 ||
+      imageUrl === '' ||
+      description === '';
   }
 
   const renderAddItem = () => {
+    const {__typename, name, drugType, id, amountType, dosageValue, price, supplyInDays, imageUrl, description} = newItem;
+    const shouldDisable = getDisableButton();
     return (
-      <tr>
-        <td><fieldset><input type="text" name="__typename" onChange={handleChange} placeholder="Type" /></fieldset></td>
-        <td><fieldset><input type="text" name="name" onChange={handleChange} placeholder="Name" /></fieldset></td>
-        <td><fieldset><input type="text" name="drugType" onChange={handleChange} placeholder="Drug Type" /></fieldset></td>
-        <td><fieldset><input type="text" name="id" onChange={handleChange} placeholder="ID" /></fieldset></td>
-        <td><fieldset><input type="text" name="amountType" onChange={handleChange} placeholder="Amount Type" /></fieldset></td>
-        <td><fieldset><input type="text" name="dosageValue" onChange={handleChange} placeholder="Dosage" /></fieldset></td>
-        <td><fieldset><input type="text" name="price" onChange={handleChange} placeholder="Price" /></fieldset></td>
-        <td><fieldset><input type="text" name="supplyInDays" onChange={handleChange} placeholder="Supply in Days" /></fieldset></td>
-        <td><fieldset><input type="text" name="imageUrl" onChange={handleChange} placeholder="Image URL" /></fieldset></td>
-        <td><fieldset><input type="text" name="description" onChange={handleChange} placeholder="Description" /></fieldset></td>
-        <td><button onClick={() => handleSubmit(newItem)}>Add Item</button></td>
-      </tr>
+      <form onSubmit={handleSubmit}>
+        <fieldset>
+          <table>
+          <tr>
+            <th>Type<input type="text" name="__typename" onChange={handleChange} placeholder="Type" value={__typename || ''}/></th>
+            <th>Name<input type="text" name="name" onChange={handleChange} placeholder="Name" value={name || ''}/></th>
+            <th>Drug<input type="text" name="drugType" onChange={handleChange} placeholder="Drug Type" value={drugType || ''}/></th>
+            <th>ID<input type="text" name="id" onChange={handleChange} placeholder="ID" value={id || ''}/></th>
+            <th>Amount<input type="text" name="amountType" onChange={handleChange} placeholder="Amount Type" value={amountType || ''}/></th>
+            <th>Dosage<input type="text" name="dosageValue" onChange={handleChange} placeholder="Dosage" value={dosageValue || ''}/></th>
+            <th>Price<input type="text" name="price" onChange={handleChange} placeholder="Price" value={price || ''}/></th>
+            <th>Supply in Days<input type="text" name="supplyInDays" onChange={handleChange} placeholder="Supply in Days" value={supplyInDays || ''}/></th>
+            <th>Image<input type="text" name="imageUrl" onChange={handleChange} placeholder="Image URL" value={imageUrl || ''}/></th>
+            <th>Description<input type="text" name="description" onChange={handleChange} placeholder="Description" value={description || ''}/></th>
+            <th><button type='submit' disabled={shouldDisable}>Add Item</button></th>
+          </tr>
+          </table>
+        </fieldset>
+      </form>
     )
   }
 
   return (
     <div>
+        {renderAddItem()}
       <table>
         <tr>
           <th>Type</th>
@@ -119,7 +167,6 @@ export const InventoryList = (props: InventoryListProps) => {
             {showUndoAdd && <button onClick={() => {removeItem(lastDeleted, true)}}>Undo Add</button>}
           </th>
         </tr>
-        {renderAddItem()}
         {inventory && inventory.map((product) =>
           <tr>
             <Item 

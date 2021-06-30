@@ -64,11 +64,20 @@ export const InventoryList = (props: InventoryListProps) => {
   );
 
   useEffect(() => {
-    setNewItem({})
+    setNewItem({
+      amountType: '',
+      description: '',
+      dosageValue: 0,
+      drugType: '',
+      id: '',
+      imageUrl: '',
+      name: '',
+      price: 0,
+      supplyInDays: 0,
+      __typename: '',
+    });
   }, [inventory]);
 
-  console.log('newItem:', newItem)
-  
   const showUndoDelete = JSON.stringify(lastDeleted) !== JSON.stringify({});
   const showUndoAdd = JSON.stringify(lastAdded) !== JSON.stringify({});
 
